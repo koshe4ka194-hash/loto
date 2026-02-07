@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotto for Genially</title>
+    <style>
+        :root { --p1-bg: #fff5f5; --p2-bg: #f5faff; --accent: #6c5ce7; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ffffff; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        
+        .game-container { max-width: 600px; width: 100%; text-align: center; }
+        
+        /* Секция мешка */
+        .bag-card { background: #f8f9fa; border: 2px solid #ddd; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        #current-token { 
+            width: 100px; height: 100px; background: white; border: 3px solid var(--accent); 
+            margin: 15px auto; border-radius: 15px; display: flex; align-items: center; justify-content: center;
+        }
+        #current-token img { width: 80%; height: 80%; object-fit: contain; }
+        #token-emoji { font-size: 50px; }
+
+        /* Игровые поля */
+        .boards { display: flex; gap: 20px; justify-content: center; }
+        .player-board { flex: 1; border: 2px solid #333; border-radius: 15px; padding: 10px; min-width: 250px; }
+        .player-board.p1 { background: var(--p1-bg); }
+        .player-board.p2 { background: var(--p2-bg); }
+
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .cell { 
+            aspect-ratio: 1/1; background: white; border: 1px solid #ccc; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;
+        }
+        .cell img { width: 70%; height: 70%; object-fit: contain; }
+        .cell.checked::after { content: "✅"; position: absolute; font-size: 30px; background: rgba(255,255,255,0.7); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+
+        button { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { opacity: 0.9; transform: scale(1.05); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        #status { margin: 15px 0; font-weight: bold; color: #444; min-height: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="bag-card">
+        <div style="color: #666; font-size: 14px;">Осталось в мешке: <span id="bag-count">0</span></div>
+        <div id="current-token">
+            <span id="token-emoji">?</span>
+        </div>
+        <button id="draw-btn" onclick="draw()">ТЯНУТЬ ФИШКУ</button>
+    </div>
+
+    <div id="status">Нажмите кнопку, чтобы начать игру!</div>
+
+    <div class="boards">
+        <div class="player-board p1">
+            <strong>Игрок 1</strong>
+            <div id="grid1" class="grid"></div>
+        </div>
+        <div class="player-board p2">
+            <strong>Игрок 2</strong>
+            <div id="grid2" class="grid"></div>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <button onclick="initGame()" style="background: #666; font-size: 12px;">ПЕРЕМЕШАТЬ И НАЧАТЬ ЗАНОВО</button>
+    </div>
+</div>
+
+<script>
+    // 1. Вставьте сюда ссылки на ваши картинки
+    const IMAGES = [
+        "https://cdn-icons-png.flaticon.com/128/2909/2909774.png",
+        "https://cdn-icons-png.flaticon.com/128/2909/2909808.png",
+        "https://cdn-icons-png.flaticon.com/128/2909/2909881.png",
+        "https://cdn-icons-png.flaticon.com/128/2909/2909846.png",
+        "https://cdn-icons-png.flaticon.com/128/2909/2909761.png",
+        "https://cdn-icons-png.flaticon.com/128/2909/2909890.png",
+        "https://cdn-icons-png.flaticon.com/128/1135/1135534.png",
+        "https://cdn-icons-png.flaticon.com/128/1135/1135544.png",
+        "https://cdn-icons-png.flaticon.com/128/1135/1135531.png",
+        "https://cdn-icons-png.flaticon.com/128/1135/1135538.png",
+        "https://cdn-icons-png.flaticon.com/128/1135/1135548.png",
+        "https://cdn-icons-png.flaticon.com/128/1135/1135530.png"
+    ];
+
+    const CARDS_COUNT = 6; // Количество фишек у одного игрока
+    let bag = [];
+    let currentImg = null;
+
+    function initGame() {
+        document.getElementById('draw-btn').disabled = false;
+        document.getElementById('token-emoji').style.display = 'block';
+        document.getElementById('token-emoji').innerText = '?';
+        document.getElementById('current-token').innerHTML = '<span id="token-emoji">?</span>';
+        document.getElementById('status').innerText = "Удачи!";
+
+        // Перемешиваем и раздаем уникальные наборы
+        let pool = [...IMAGES].sort(() => Math.random() - 0.5);
+        let p1 = pool.slice(0, CARDS_COUNT);
+        let p2 = pool.slice(CARDS_COUNT, CARDS_COUNT * 2);
+
+        // В мешке только те, что на поле
+        bag = [...p1, ...p2].sort(() => Math.random() - 0.5);
+
+        renderBoard('grid1', p1);
+        renderBoard('grid2', p2);
+        updateCount();
+    }
+
+    function renderBoard(id, items) {
+        const grid = document.getElementById(id);
+        grid.innerHTML = '';
+        items.forEach(src => {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.innerHTML = `<img src="${src}">`;
+            cell.onclick = () => {
+                if (currentImg === src) {
+                    cell.classList.add('checked');
+                    checkWinner();
+                }
+            };
+            grid.appendChild(cell);
+        });
+    }
+
+    function draw() {
+        if (bag.length === 0) return;
+        currentImg = bag.pop();
+        document.getElementById('current-token').innerHTML = `<img src="${currentImg}">`;
+        document.getElementById('status').innerText = "Ищите картинку у себя!";
+        updateCount();
+        if (bag.length === 0) document.getElementById('draw-btn').disabled = true;
+    }
+
+    function updateCount() {
+        document.getElementById('bag-count').innerText = bag.length;
+    }
+
+    function checkWinner() {
+        [1, 2].forEach(num => {
+            const total = document.querySelectorAll(`#grid${num} .cell`).length;
+            const checked = document.querySelectorAll(`#grid${num} .cell.checked`).length;
+            if (total === checked) {
+                document.getElementById('status').innerText = `🎉 ИГРОК ${num} ПОБЕДИЛ!`;
+                document.getElementById('draw-btn').disabled = true;
+            }
+        });
+    }
+
+    initGame();
+</script>
+
+</body>
+</html>
