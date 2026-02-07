@@ -6,52 +6,52 @@
     <title>Lotto for Genially</title>
     <style>
         :root { --p1-bg: #fff5f5; --p2-bg: #f5faff; --accent: #6c5ce7; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ffffff; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        body { font-family: 'Segoe UI', sans-serif; background: #ffffff; margin: 0; padding: 10px; display: flex; justify-content: center; }
         
         .game-container { max-width: 600px; width: 100%; text-align: center; }
         
         /* Секция мешка */
-        .bag-card { background: #f8f9fa; border: 2px solid #ddd; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .bag-card { background: #f8f9fa; border: 2px solid #ddd; border-radius: 20px; padding: 15px; margin-bottom: 15px; }
         #current-token { 
             width: 100px; height: 100px; background: white; border: 3px solid var(--accent); 
-            margin: 15px auto; border-radius: 15px; display: flex; align-items: center; justify-content: center;
+            margin: 10px auto; border-radius: 15px; display: flex; align-items: center; justify-content: center;
         }
         #current-token img { width: 80%; height: 80%; object-fit: contain; }
-        #token-emoji { font-size: 50px; }
+        .token-placeholder { font-size: 50px; color: #ccc; }
 
         /* Игровые поля */
-        .boards { display: flex; gap: 20px; justify-content: center; }
-        .player-board { flex: 1; border: 2px solid #333; border-radius: 15px; padding: 10px; min-width: 250px; }
+        .boards { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .player-board { flex: 1; border: 2px solid #333; border-radius: 15px; padding: 10px; min-width: 260px; max-width: 280px; }
         .player-board.p1 { background: var(--p1-bg); }
         .player-board.p2 { background: var(--p2-bg); }
 
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
         .cell { 
             aspect-ratio: 1/1; background: white; border: 1px solid #ccc; border-radius: 10px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;
         }
-        .cell img { width: 70%; height: 70%; object-fit: contain; }
+        .cell img { width: 75%; height: 75%; object-fit: contain; }
         .cell.checked::after { content: "✅"; position: absolute; font-size: 30px; background: rgba(255,255,255,0.7); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
 
-        button { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { opacity: 0.9; transform: scale(1.05); }
+        button { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
         button:disabled { background: #ccc; cursor: not-allowed; }
         
-        #status { margin: 15px 0; font-weight: bold; color: #444; min-height: 20px; }
+        #status { margin: 10px 0; font-weight: bold; color: #444; min-height: 1.2em; }
+        .reset-btn { background: #666; font-size: 12px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="game-container">
     <div class="bag-card">
-        <div style="color: #666; font-size: 14px;">Осталось в мешке: <span id="bag-count">0</span></div>
+        <div style="color: #666; font-size: 14px;">Осталось: <span id="bag-count">0</span></div>
         <div id="current-token">
-            <span id="token-emoji">?</span>
+            <span class="token-placeholder">?</span>
         </div>
         <button id="draw-btn" onclick="draw()">ТЯНУТЬ ФИШКУ</button>
     </div>
 
-    <div id="status">Нажмите кнопку, чтобы начать игру!</div>
+    <div id="status">Загрузка...</div>
 
     <div class="boards">
         <div class="player-board p1">
@@ -64,13 +64,11 @@
         </div>
     </div>
 
-    <div style="margin-top: 30px;">
-        <button onclick="initGame()" style="background: #666; font-size: 12px;">ПЕРЕМЕШАТЬ И НАЧАТЬ ЗАНОВО</button>
-    </div>
+    <button class="reset-btn" onclick="initGame()">ПЕРЕМЕШАТЬ И НАЧАТЬ ЗАНОВО</button>
 </div>
 
 <script>
-    // 1. Вставьте сюда ссылки на ваши картинки
+    // 1. Вставьте сюда ссылки на ваши картинки (минимум 12 для 2 игроков по 6 фишек)
     const IMAGES = [
         "https://cdn-icons-png.flaticon.com/128/2909/2909774.png",
         "https://cdn-icons-png.flaticon.com/128/2909/2909808.png",
@@ -86,23 +84,26 @@
         "https://cdn-icons-png.flaticon.com/128/1135/1135530.png"
     ];
 
-    const CARDS_COUNT = 6; // Количество фишек у одного игрока
+    const CARDS_COUNT = 6; 
     let bag = [];
     let currentImg = null;
 
     function initGame() {
+        // Полный сброс состояния
+        bag = [];
+        currentImg = null;
+        
+        // Сброс интерфейса
         document.getElementById('draw-btn').disabled = false;
-        document.getElementById('token-emoji').style.display = 'block';
-        document.getElementById('token-emoji').innerText = '?';
-        document.getElementById('current-token').innerHTML = '<span id="token-emoji">?</span>';
-        document.getElementById('status').innerText = "Удачи!";
+        document.getElementById('current-token').innerHTML = '<span class="token-placeholder">?</span>';
+        document.getElementById('status').innerText = "Новая игра! Тяните фишку.";
 
         // Перемешиваем и раздаем уникальные наборы
         let pool = [...IMAGES].sort(() => Math.random() - 0.5);
         let p1 = pool.slice(0, CARDS_COUNT);
         let p2 = pool.slice(CARDS_COUNT, CARDS_COUNT * 2);
 
-        // В мешке только те, что на поле
+        // В мешке только те, что на поле (всего 12)
         bag = [...p1, ...p2].sort(() => Math.random() - 0.5);
 
         renderBoard('grid1', p1);
@@ -131,9 +132,12 @@
         if (bag.length === 0) return;
         currentImg = bag.pop();
         document.getElementById('current-token').innerHTML = `<img src="${currentImg}">`;
-        document.getElementById('status').innerText = "Ищите картинку у себя!";
+        document.getElementById('status').innerText = "У кого есть эта картинка?";
         updateCount();
-        if (bag.length === 0) document.getElementById('draw-btn').disabled = true;
+        if (bag.length === 0) {
+            document.getElementById('draw-btn').disabled = true;
+            document.getElementById('status').innerText = "Фишки кончились!";
+        }
     }
 
     function updateCount() {
@@ -142,15 +146,17 @@
 
     function checkWinner() {
         [1, 2].forEach(num => {
-            const total = document.querySelectorAll(`#grid${num} .cell`).length;
-            const checked = document.querySelectorAll(`#grid${num} .cell.checked`).length;
-            if (total === checked) {
-                document.getElementById('status').innerText = `🎉 ИГРОК ${num} ПОБЕДИЛ!`;
+            const grid = document.getElementById(`grid${num}`);
+            const total = grid.querySelectorAll('.cell').length;
+            const checked = grid.querySelectorAll('.cell.checked').length;
+            if (total === checked && total > 0) {
+                document.getElementById('status').innerText = `🏆 ИГРОК ${num} ВЫИГРАЛ!`;
                 document.getElementById('draw-btn').disabled = true;
             }
         });
     }
 
+    // Запуск при первой загрузке
     initGame();
 </script>
 
