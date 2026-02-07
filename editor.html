@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактор Лото для Genially</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
+        .editor-container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { color: #6c5ce7; border-bottom: 2px solid #6c5ce7; padding-bottom: 10px; }
+        .section { margin-bottom: 25px; padding: 15px; border: 1px solid #eee; border-radius: 10px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; }
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .hint { font-size: 12px; color: #666; margin-top: -5px; margin-bottom: 10px; }
+        button { background: #6c5ce7; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 100%; }
+        button:hover { background: #5a4bd6; }
+        #output { margin-top: 30px; display: none; }
+        textarea#finalCode { height: 300px; font-family: monospace; background: #2d3436; color: #dfe6e9; padding: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="editor-container">
+    <h1>🛠️ Конструктор вашего Лото</h1>
+    
+    <div class="section">
+        <label>Заголовок игры</label>
+        <input type="text" id="gameTitle" placeholder="Например: Лото: Веселые овощи">
+        
+        <label>Текст при победе</label>
+        <input type="text" id="winMessage" placeholder="Например: Ура! Вы мастер лото!">
+    </div>
+
+    <div class="section">
+        <label>Размер сетки (фишек на игрока)</label>
+        <select id="gridSize">
+            <option value="6">3 x 2 (6 фишек)</option>
+            <option value="8">4 x 2 (8 фишек)</option>
+            <option value="10">5 x 2 (10 фишек)</option>
+        </select>
+    </div>
+
+    <div class="section">
+        <label>Цветовая тема (Основной цвет стола)</label>
+        <input type="color" id="mainColor" value="#5d4037">
+        <p class="hint">Выберите цвет игрового поля.</p>
+    </div>
+
+    <div class="section">
+        <label>Ссылки на картинки (каждая с новой строки)</label>
+        <textarea id="imgLinks" placeholder="https://site.com/img1.png&#10;https://site.com/img2.png" rows="10"></textarea>
+        <p class="hint">Минимум нужно столько картинок, сколько фишек у обоих игроков вместе. (До 30 шт.)</p>
+    </div>
+
+    <button onclick="generateGame()">Сгенерировать код для GitHub</button>
+
+    <div id="output">
+        <h3>Готовый код:</h3>
+        <p class="hint">Скопируйте всё из поля ниже и вставьте в ваш файл index.html на GitHub.</p>
+        <textarea id="finalCode" readonly></textarea>
+        <button onclick="copyCode()" style="background:#00b894; margin-top:10px;">Копировать в буфер обмена</button>
+    </div>
+</div>
+
+<script>
+function generateGame() {
+    const title = document.getElementById('gameTitle').value || "ЛОТО";
+    const winMsg = document.getElementById('winMessage').value || "ПОБЕДА!";
+    const grid = document.getElementById('gridSize').value;
+    const color = document.getElementById('mainColor').value;
+    const imgs = document.getElementById('imgLinks').value.trim().split('\n').filter(l => l.length > 5);
+
+    if (imgs.length < grid * 2) {
+        alert("Мало картинок! Для выбранной сетки нужно минимум " + (grid * 2) + " шт.");
+        return;
+    }
+
+    const template = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root { --wood: ${color}; --accent: #ff9800; }
+        body { margin: 0; padding: 10px; background: radial-gradient(circle, var(--wood) 0%, #000 150%); font-family: sans-serif; display: flex; justify-content: center; color: white; overflow-x: hidden; }
+        .game-wrapper { max-width: 800px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .bag-bowl { background: #fdf5e6; border: 5px solid #8d6e63; border-radius: 30px; padding: 15px; width: 180px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; color: #3e2723; }
+        #token-display { width: 80px; height: 80px; background: #d7ccc8; border-radius: 50%; margin: 10px auto; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 4px 6px rgba(0,0,0,0.3); border: 2px solid #a1887f; }
+        .btn-3d { background: linear-gradient(180deg, #ffb74d 0%, #f57c00 100%); border: none; padding: 10px 20px; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 5px 0 #b71c1c; transition: 0.1s; text-transform: uppercase; }
+        .btn-3d:active { transform: translateY(3px); box-shadow: 0 2px 0 #b71c1c; }
+        .cards-row { display: flex; gap: 15px; width: 100%; justify-content: center; }
+        .player-card { flex: 1; background: white; border-radius: 15px; padding: 10px; max-width: 300px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .player-name { color: #333; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #eee; }
+        .grid { display: grid; grid-template-columns: repeat(${grid == 6 ? 3 : grid == 8 ? 4 : 5}, 1fr); gap: 8px; }
+        .chip { aspect-ratio: 1; background: white; border-radius: 50%; border: 2px solid #eee; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; box-shadow: 0 3px 5px rgba(0,0,0,0.2); }
+        .chip img { width: 70%; height: 70%; object-fit: contain; }
+        .chip.found::after { content: "✔"; position: absolute; width: 100%; height: 100%; background: rgba(46, 204, 113, 0.85); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
+        #status { font-weight: bold; font-size: 18px; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <h2 style="margin:0">${title}</h2>
+    <div id="status">Загрузка...</div>
+    <div class="bag-bowl">
+        <div style="font-size: 11px;">ОСТАЛОСЬ: <span id="count">0</span></div>
+        <div id="token-display">?</div>
+        <button id="draw-btn" class="btn-3d" onclick="draw()">ДОСТАТЬ</button>
+    </div>
+    <div class="cards-row">
+        <div class="player-card">
+            <div class="player-name">ИГРОК 1</div>
+            <div id="grid1" class="grid"></div>
+        </div>
+        <div class="player-card">
+            <div class="player-name">ИГРОК 2</div>
+            <div id="grid2" class="grid"></div>
+        </div>
+    </div>
+    <button class="btn-3d" style="background:#78909c; box-shadow: 0 5px 0 #455a64;" onclick="init()">СБРОСИТЬ</button>
+</div>
+<script>
+    const IMGS = ${JSON.stringify(imgs)};
+    const COUNT = ${grid};
+    let bag = [], current = null;
+    function init() {
+        current = null; document.getElementById('draw-btn').disabled = false;
+        document.getElementById('token-display').innerHTML = '?';
+        document.getElementById('status').innerText = "Ходите!";
+        let pool = [...IMGS].sort(() => Math.random() - 0.5);
+        let p1 = pool.slice(0, COUNT);
+        let p2 = pool.slice(COUNT, COUNT * 2);
+        bag = [...p1, ...p2].sort(() => Math.random() - 0.5);
+        render('grid1', p1); render('grid2', p2); updateUI();
+    }
+    function render(id, items) {
+        const g = document.getElementById(id); g.innerHTML = '';
+        items.forEach(src => {
+            const div = document.createElement('div'); div.className = 'chip';
+            div.innerHTML = '<img src="'+src+'">';
+            div.onclick = () => { if (src === current) { div.classList.add('found'); checkWin(); } };
+            g.appendChild(div);
+        });
+    }
+    function draw() {
+        if (bag.length === 0) return;
+        current = bag.pop();
+        document.getElementById('token-display').innerHTML = '<div class="chip" style="width:60px;height:60px;border:none"><img src="'+current+'"></div>';
+        updateUI();
+    }
+    function updateUI() { document.getElementById('count').innerText = bag.length; }
+    function checkWin() {
+        [1, 2].forEach(n => {
+            const found = document.getElementById('grid'+n).querySelectorAll('.chip.found').length;
+            if (found === COUNT) { document.getElementById('status').innerText = "${winMsg}"; document.getElementById('draw-btn').disabled = true; }
+        });
+    }
+    init();
+<\/script>
+</body>
+</html>`;
+
+    document.getElementById('finalCode').value = template;
+    document.getElementById('output').style.display = 'block';
+}
+
+function copyCode() {
+    const copyText = document.getElementById("finalCode");
+    copyText.select();
+    document.execCommand("copy");
+    alert("Код скопирован! Теперь вставьте его в index.html на GitHub.");
+}
+</script>
+</body>
+</html>
