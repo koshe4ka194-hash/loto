@@ -1,61 +1,291 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <style>
-        body { margin:0; padding:10px; background: radial-gradient(circle, #17b54e 0%, #000 180%); font-family: sans-serif; color:white; display:flex; flex-direction:column; align-items:center; min-height:100vh; overflow:hidden; }
-        .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; }
-        .bag-zone { display:flex; flex-direction:column; align-items:center; margin-bottom:15px; }
-        .riddle-card { 
-            width: 320px; height: 160px; background: #fdf5e6; border: 4px solid #8d6e63; border-radius: 15px;
-            color: #3e2723; display: flex; align-items: center; justify-content: center; text-align: center;
-            padding: 15px; box-sizing: border-box; font-size: 20px; font-weight: bold; line-height: 1.3;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow-y: auto; position: relative; margin-bottom: 10px;
-        }
-        .btn { background:linear-gradient(180deg, #ffb74d, #f57c00); color:white; border:none; padding:10px 25px; border-radius:10px; font-weight:bold; cursor:pointer; box-shadow:0 4px 0 #b71c1c; text-transform:uppercase; font-size:14px; }
-        .btn:active { transform:translateY(2px); box-shadow:0 2px 0 #b71c1c; }
-        .row { display:flex; gap:15px; justify-content:center; width:98%; max-width:1000px; }
-        .card { background:white; border-radius:15px; padding:12px; flex:1; box-shadow:0 10px 20px rgba(0,0,0,0.4); color:#333; min-width:280px; }
-        .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px; }
-        .chip { height: 85px; background:white; border-radius:15px; border:2px solid #eee; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden; text-align:center; padding:5px; box-sizing:border-box; font-weight:bold; font-size:14px; }
-        .chip img { width:90%; height:90%; object-fit:contain; }
-        .chip.ok::after { content:"✔"; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(46, 204, 113, 0.9); color:white; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; }
-        #st { font-weight:bold; font-size:20px; text-align:center; margin-bottom:10px; height:24px; text-shadow:0 2px 4px rgba(0,0,0,0.5); color:#ffca28; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Lotto Studio — Конструктор Лото</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#00E5FF;
+      --accent:#FF4081;
+      --glass:rgba(255,255,255,0.95);
+      --dark:#121212;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:'Montserrat',sans-serif;
+      background: radial-gradient(circle at center, #1a0033 0%, #000000 100%);
+      color:#222; padding:20px; min-height:100vh;
+    }
+    .wrap{
+      max-width:1100px; margin:0 auto;
+      background:var(--glass); border-radius:18px;
+      border:2px solid rgba(255,255,255,0.1);
+      box-shadow:0 0 18px var(--primary); padding:20px;
+    }
+    h1{ margin:0 0 10px; text-align:center; text-transform: uppercase; letter-spacing: 2px; }
+    .sub{ text-align:center; color:#444; margin-bottom:20px; font-size:13px; opacity:.9; }
+    
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+    
+    .card{
+      background:rgba(255,255,255,.6); border:1px solid rgba(0,0,0,.08);
+      border-radius:14px; padding:15px; margin:12px 0;
+    }
+    .card h2{
+      margin:0 0 10px; font-size:16px; border-bottom:2px solid var(--primary); padding-bottom:8px;
+    }
+    
+    label{font-weight:700; font-size:11px; text-transform:uppercase; color:#555; display:block; margin-bottom: 4px;}
+    input[type=text], input[type=color], select, textarea{
+      width:100%; padding:10px; border-radius:8px; border:2px solid #ddd;
+      font-family:inherit; outline:none; transition:.2s; background:white; font-size:14px;
+    }
+    input:focus, textarea:focus, select:focus{ border-color:var(--primary); box-shadow:0 0 8px rgba(0,229,255,.25); }
+    textarea{ min-height:120px; font-family: monospace; }
+    
+    .btn-main{
+      width:100%; border:none; border-radius:8px; padding:14px; cursor:pointer;
+      background:linear-gradient(45deg, #2196F3, #00E5FF); color:white;
+      font-weight:900; font-size:16px; text-transform:uppercase; margin-top: 10px;
+      transition: transform 0.1s;
+    }
+    .btn-main:active{ transform: scale(0.98); }
+    
+    .out{
+      background:#1f232a; color:#00E5FF; border-radius:12px; padding:12px;
+      font-family:monospace; word-break:break-all; max-height:150px; overflow:auto;
+    }
+    
+    .previewBox{
+      background:#eee; border:1px dashed #999; border-radius:14px; padding:10px;
+      margin-top: 10px;
+    }
+    .previewFrame{ width:100%; height:600px; border:0; background: white; border-radius: 8px; }
+    
+    .help{ font-size: 11px; color: #666; margin-top: 5px; }
+  </style>
 </head>
 <body>
-    <div id="startLayer" class="overlay">
-        <h2 style="color:white; margin-bottom:20px;">Овощи</h2>
-        <button class="btn" onclick="startAudio()">НАЧАТЬ ИГРУ</button>
+
+<div class="wrap">
+  <h1>🎨 Lotto Studio <span style="color:var(--accent); font-size:0.6em">v27.0 // Genially Edition</span></h1>
+  <div class="sub">Создает автономный код для вставки (Embed) в Genially через iframe srcdoc.</div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>⚙️ Основные настройки</h2>
+      <div class="grid2">
+        <div>
+          <label>Заголовок игры</label>
+          <input type="text" id="gTitle" value="Сказки А.С.Пушкина">
+        </div>
+        <div>
+          <label>Текст победы</label>
+          <input type="text" id="gWin" value="ГЕНИАЛЬНО! 🏆">
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:10px;">
+        <div>
+          <label>Цвет стола</label>
+          <input type="color" id="gColor" value="#1a472a" style="height:42px; cursor:pointer;">
+        </div>
+        <div>
+           <label>Размер шрифта загадки</label>
+           <select id="gFontSize">
+             <option value="16px">Мелкий</option>
+             <option value="20px" selected>Средний</option>
+             <option value="26px">Крупный</option>
+           </select>
+        </div>
+      </div>
     </div>
-    <h2 style="margin:0 0 5px 0;">Овощи</h2>
-    <div id="st">Нажмите кнопку</div>
-    <div class="bag-zone">
-        <div id="slot" class="riddle-card">Нажмите "ПОТРЯСИ МЕШОК", чтобы достать загадку</div>
-        <button class="btn" onclick="draw()">ПОТРЯСИ МЕШОК</button>
+
+    <div class="card">
+      <h2>🎮 Механика</h2>
+      <div class="grid2">
+        <div>
+          <label>Размер сетки</label>
+          <select id="gSize">
+            <option value="6">3 x 2 (6 фишек)</option>
+            <option value="8">4 x 2 (8 фишек)</option>
+          </select>
+        </div>
+        <div>
+          <label>Тип игры</label>
+          <select id="gType">
+            <option value="img">Картинки (из GitHub)</option>
+            <option value="txt">Слова (Текст)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label>Ссылка на папку GitHub (с / в конце)</label>
+        <input type="text" id="gUrl" value="https://koshe4ka194-hash.github.io/lotto/">
+        <div class="help">Обязательно проверьте, что ссылка заканчивается на слэш <b>/</b>.</div>
+      </div>
     </div>
-    <div class="row">
-        <div class="card"><center><b>ИГРОК 1</b></center><div id="g1" class="grid"></div></div>
-        <div class="card"><center><b>ИГРОК 2</b></center><div id="g2" class="grid"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>📝 Карточки и Загадки</h2>
+    <div class="help" style="margin-bottom:10px;">
+      Формат: <b>Загадка | Ответ</b>. <br>
+      Если выбран тип "Картинки", в ответе пишите имя файла (напр. <i>03.png</i>).<br>
+      Если тип "Слова", пишите просто слово.
     </div>
-    <button class="btn" style="margin-top:20px; background:#607d8b; box-shadow:0 4px 0 #37474f; font-size:10px;" onclick="reset()">СБРОСИТЬ</button>
+    <textarea id="gData">Текст загадки... | Ответ
+Сидит дед, во сто шуб одет | 03.png
+Зимой и летом одним цветом | 04.png
+Рыжая плутовка | 06.png
+</textarea>
+  </div>
+
+  <button class="btn-main" onclick="generate()">СГЕНЕРИРОВАТЬ ИГРУ</button>
+
+  <div class="grid2" style="margin-top:20px;">
+    <div class="card">
+      <h2>📤 Код для вставки</h2>
+      <div class="help" style="margin-bottom:5px;">Скопируйте и вставьте в Genially (Insert -> Others)</div>
+      <div id="output" class="out">Нажмите кнопку "СГЕНЕРИРОВАТЬ"...</div>
+      <button class="btn-main" style="background:#333; margin-top:10px; font-size:12px;" onclick="copyCode()">Копировать код</button>
+    </div>
+    <div class="card">
+      <h2>👀 Предпросмотр</h2>
+      <div class="previewBox">
+        <iframe id="preview" class="previewFrame"></iframe>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 <script>
-    const DATA = [{"q":"Сидит дед во сто шуб одет","a":"лук"},{"q":"Сидит девица в темнице, а коса на улице","a":"морковь"},{"q":"Сто одёжек и все без застёжек","a":"капуста"},{"q":"Важный-важный, красный-красный,щёки он раздул на ветке,очень яркий и нарядный,Его любят даже детки","a":"помидор"},{"q":"Вверху зелено, внизу красно,В землю вросло.","a":"свекла"},{"q":"Маленький и горький, луку брат","a":"чеснок"},{"q":"Хоть чернил он не видал,фиолетовым вдруг стал,и лоснится от похвал очень важный…","a":"баклажан"},{"q":"Кругла да гладка,Откусишь-сладка.Засела крепко на грядке","a":"репка"},{"q":"Красная мышка с белым хвостом в норке сидит под зеленым листом.","a":"редиска"},{"q":"Летом – в огороде,Свежие, зеленые,А зимою – в бочке,Крепкие, соленые.","a":"огурцы"},{"q":"Голова на ножке, в голове горошки.","a":"горох"},{"q":"Вертится Антошка на одной ножке,Где солнце стоит, туда он и глядит","a":"подсолнух"},{"q":"Это вовсе не игрушка — Ароматная…","a":"петрушка"}];
-    const TYPE = 'txt';
-    const SIZE = 6;
-    const BASE = 'https://koshe4ka194-hash.github.io/lotto/img/';
-    const aD = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/meshok.mp3'); const aP = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/fishka.mp3'); const aW = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/victory.mp3');
-    let bag = [], curr = null;
+  // ---------- Функции генерации ----------
 
-    function startAudio() {
-        [aD, aP, aW].forEach(s => { s.play().then(() => s.pause()); });
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function generate() {
+    // 1. Сбор данных
+    const title = document.getElementById('gTitle').value;
+    const winText = document.getElementById('gWin').value;
+    const color = document.getElementById('gColor').value;
+    const size = parseInt(document.getElementById('gSize').value);
+    const type = document.getElementById('gType').value;
+    const fontSize = document.getElementById('gFontSize').value;
+    let url = document.getElementById('gUrl').value.trim();
+    if (url && !url.endsWith('/')) url += '/';
+
+    const rawData = document.getElementById('gData').value.trim().split('\n');
+    const dataArray = [];
+    
+    rawData.forEach(line => {
+        if(line.includes('|')) {
+            const parts = line.split('|');
+            dataArray.push({ q: parts[0].trim(), a: parts[1].trim() });
+        }
+    });
+
+    if (dataArray.length < size * 2) {
+        alert(`Внимание! Для сетки ${size}x2 нужно минимум ${size * 2} пар (у вас ${dataArray.length}).`);
+    }
+
+    const cols = (size === 6) ? 3 : 4;
+
+    // Ссылки на звуки (жестко прописаны по вашему запросу)
+    const sShake = "https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/meshok.mp3";
+    const sPlace = "https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/fishka.mp3";
+    const sWin = "https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/victory.mp3";
+
+    // 2. Шаблон игры (Ваш рабочий код v27.0)
+    const gameHTML = `
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin:0; padding:10px; background: radial-gradient(circle, ${color} 0%, #000 180%); font-family: 'Segoe UI', sans-serif; color:white; display:flex; flex-direction:column; align-items:center; min-height:100vh; overflow:hidden; user-select:none; }
+  .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; }
+  
+  .riddle-card { 
+      width: 300px; height: 150px; background: #fdf5e6; border: 4px solid #8d6e63; border-radius: 15px;
+      color: #3e2723; display: flex; align-items: center; justify-content: center; text-align: center;
+      padding: 15px; box-sizing: border-box; font-size: ${fontSize}; font-weight: bold; line-height: 1.3;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow-y: auto; position: relative; margin-bottom: 10px;
+      transition: transform 0.3s;
+  }
+  
+  .btn { background:linear-gradient(180deg, #ffb74d, #f57c00); color:white; border:none; padding:10px 25px; border-radius:10px; font-weight:bold; cursor:pointer; box-shadow:0 4px 0 #b71c1c; text-transform:uppercase; font-size:14px; }
+  .btn:active { transform:translateY(2px); box-shadow:0 2px 0 #b71c1c; }
+  .btn-reset { margin-top:20px; background:#607d8b; box-shadow:0 4px 0 #37474f; font-size:10px; }
+
+  .row { display:flex; gap:15px; justify-content:center; width:98%; max-width:900px; }
+  .card { background:white; border-radius:15px; padding:10px; flex:1; box-shadow:0 10px 20px rgba(0,0,0,0.4); color:#333; min-width:250px; }
+  
+  .grid { display:grid; grid-template-columns: repeat(${cols}, 1fr); gap:8px; margin-top:10px; }
+  .chip { height: 80px; background:white; border-radius:12px; border:2px solid #eee; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden; text-align:center; padding:2px; font-weight:bold; font-size:13px; word-break: break-word; }
+  .chip:hover { border-color: #f57c00; }
+  .chip img { width:95%; height:95%; object-fit:contain; }
+  
+  .chip.ok::after { content:"✔"; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(46, 204, 113, 0.9); color:white; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; animation: pop 0.3s; }
+  @keyframes pop { 0% {transform:scale(0);} 100% {transform:scale(1);} }
+
+  #st { font-weight:bold; font-size:20px; text-align:center; margin-bottom:10px; height:24px; text-shadow:0 2px 4px rgba(0,0,0,0.5); color:#ffca28; }
+</style>
+</head>
+<body>
+
+<div id="startLayer" class="overlay">
+    <h2 style="color:white; margin-bottom:20px; text-align:center;">${title}</h2>
+    <button class="btn" onclick="startGame()">НАЧАТЬ ИГРУ</button>
+</div>
+
+<h2 style="margin:0 0 5px 0; text-align:center;">${title}</h2>
+<div id="st">Нажмите кнопку</div>
+
+<div style="display:flex; flex-direction:column; align-items:center;">
+    <div id="slot" class="riddle-card">Нажмите "ПОТРЯСИ МЕШОК"</div>
+    <button class="btn" onclick="draw()">ПОТРЯСИ МЕШОК</button>
+</div>
+
+<div class="row" style="margin-top:15px;">
+    <div class="card"><center><b>ИГРОК 1</b></center><div id="g1" class="grid"></div></div>
+    <div class="card"><center><b>ИГРОК 2</b></center><div id="g2" class="grid"></div></div>
+</div>
+
+<button class="btn btn-reset" onclick="reset()">СБРОСИТЬ</button>
+
+<script>
+    const DATA = ${JSON.stringify(dataArray)};
+    const TYPE = '${type}';
+    const SIZE = ${size};
+    const BASE = '${url}img/';
+    
+    // Звуки
+    const aD = new Audio('${sShake}'); 
+    const aP = new Audio('${sPlace}'); 
+    const aW = new Audio('${sWin}');
+    
+    let bag = [], curr = null, winLock = false;
+
+    function startGame() {
+        [aD, aP, aW].forEach(s => { s.play().then(() => s.pause()).catch(()=>{}); });
         document.getElementById('startLayer').style.display = 'none';
         reset();
     }
 
     function reset() {
-        curr = null; document.getElementById('slot').innerText = 'Нажмите "ПОТРЯСИ МЕШОК"';
+        curr = null; winLock = false;
+        document.getElementById('slot').innerText = 'Нажмите "ПОТРЯСИ МЕШОК"';
         let p = [...DATA].sort(() => Math.random() - 0.5);
         let p1 = p.slice(0, SIZE); let p2 = p.slice(SIZE, SIZE * 2);
         bag = [...p1, ...p2].sort(() => Math.random() - 0.5);
@@ -68,7 +298,7 @@
         items.forEach(item => {
             const d = document.createElement('div'); d.className = 'chip';
             if(TYPE === 'img') {
-                d.innerHTML = '<img src="'+BASE+item.a+'" onerror="this.parentNode.innerText=\'❌\' ">';
+                d.innerHTML = '<img src="'+BASE+item.a+'" onerror="this.parentNode.innerText=\\'❌\\'">';
             } else {
                 d.innerText = item.a;
             }
@@ -83,19 +313,53 @@
     }
 
     function draw() {
-        if(!bag.length) return;
+        if(!bag.length || winLock) return;
         aD.currentTime=0; aD.play();
         curr = bag.pop();
-        setTimeout(() => { document.getElementById('slot').innerText = curr.q; }, 300);
+        // Анимация карточки
+        const slot = document.getElementById('slot');
+        slot.style.transform = "scale(0.9)";
+        setTimeout(() => { 
+            slot.innerText = curr.q; 
+            slot.style.transform = "scale(1)";
+        }, 300);
     }
 
     function check() {
         [1,2].forEach(n => {
             if(document.getElementById('g' + n).querySelectorAll('.chip.ok').length === SIZE) {
-                aW.play(); document.getElementById('st').innerText = 'ГЕНИАЛЬНО! 🏆';
+                if(!winLock) { aW.currentTime=0; aW.play(); winLock = true; }
+                document.getElementById('st').innerText = '${winText}';
             }
         });
     }
+<\/script>
+</body>
+</html>`;
+
+    // 3. Создаем srcdoc iframe
+    // Экранируем HTML для вставки в атрибут srcdoc
+    const escapedHTML = gameHTML
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;");
+
+    const iframeCode = `<iframe srcdoc="${escapedHTML}" width="100%" height="700" style="border:none; background:transparent;"></iframe>`;
+
+    // 4. Вывод
+    document.getElementById('output').textContent = iframeCode;
+    
+    // Предпросмотр
+    const previewFrame = document.getElementById('preview');
+    previewFrame.srcdoc = gameHTML;
+  }
+
+  function copyCode() {
+    const txt = document.getElementById('output').textContent;
+    navigator.clipboard.writeText(txt).then(() => {
+      alert("Код скопирован! Вставляйте в Genially.");
+    });
+  }
 </script>
+
 </body>
 </html>
