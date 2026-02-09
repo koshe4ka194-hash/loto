@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { margin:0; padding:10px; background: radial-gradient(circle, #1995ae 0%, #000 180%); font-family: sans-serif; color:white; display:flex; flex-direction:column; align-items:center; min-height:100vh; overflow:hidden; }
+        body { margin:0; padding:10px; background: radial-gradient(circle, #17b54e 0%, #000 180%); font-family: sans-serif; color:white; display:flex; flex-direction:column; align-items:center; min-height:100vh; overflow:hidden; }
         .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; }
-        .bag-box { background:#fdf5e6; border:5px solid #8d6e63; border-radius:25px; padding:15px; width:280px; text-align:center; color:#3e2723; box-shadow:0 10px 20px rgba(0,0,0,0.5); margin-bottom:15px; }
-        #slot { width:100%; min-height:80px; background:#d7ccc8; border-radius:15px; margin:10px auto; display:flex; align-items:center; justify-content:center; border:2px solid #a1887f; box-shadow:inset 0 4px 8px rgba(0,0,0,0.2); padding:10px; box-sizing:border-box; font-size:18px; line-height:1.3; font-weight:bold; }
-        .btn { background:linear-gradient(180deg, #ffb74d, #f57c00); color:white; border:none; padding:12px 20px; border-radius:10px; font-weight:bold; cursor:pointer; box-shadow:0 4px 0 #b71c1c; text-transform:uppercase; font-size:14px; }
+        .bag-zone { display:flex; flex-direction:column; align-items:center; margin-bottom:15px; }
+        .riddle-card { 
+            width: 320px; height: 160px; background: #fdf5e6; border: 4px solid #8d6e63; border-radius: 15px;
+            color: #3e2723; display: flex; align-items: center; justify-content: center; text-align: center;
+            padding: 15px; box-sizing: border-box; font-size: 20px; font-weight: bold; line-height: 1.3;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow-y: auto; position: relative; margin-bottom: 10px;
+        }
+        .btn { background:linear-gradient(180deg, #ffb74d, #f57c00); color:white; border:none; padding:10px 25px; border-radius:10px; font-weight:bold; cursor:pointer; box-shadow:0 4px 0 #b71c1c; text-transform:uppercase; font-size:14px; }
         .btn:active { transform:translateY(2px); box-shadow:0 2px 0 #b71c1c; }
         .row { display:flex; gap:15px; justify-content:center; width:98%; max-width:1000px; }
         .card { background:white; border-radius:15px; padding:12px; flex:1; box-shadow:0 10px 20px rgba(0,0,0,0.4); color:#333; min-width:280px; }
@@ -25,8 +30,8 @@
     </div>
     <h2 style="margin:0 0 5px 0;">Овощи</h2>
     <div id="st">Нажмите кнопку</div>
-    <div class="bag-box">
-        <div id="slot">?</div>
+    <div class="bag-zone">
+        <div id="slot" class="riddle-card">Нажмите "ПОТРЯСИ МЕШОК", чтобы достать загадку</div>
         <button class="btn" onclick="draw()">ПОТРЯСИ МЕШОК</button>
     </div>
     <div class="row">
@@ -40,9 +45,7 @@
     const TYPE = 'txt';
     const SIZE = 6;
     const BASE = 'https://koshe4ka194-hash.github.io/lotto/img/';
-    const aD = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/meshok.mp3'); 
-    const aP = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/fishka.mp3'); 
-    const aW = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/victory.mp3');
+    const aD = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/meshok.mp3'); const aP = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/fishka.mp3'); const aW = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/victory.mp3');
     let bag = [], curr = null;
 
     function startAudio() {
@@ -52,7 +55,7 @@
     }
 
     function reset() {
-        curr = null; document.getElementById('slot').innerText = '?';
+        curr = null; document.getElementById('slot').innerText = 'Нажмите "ПОТРЯСИ МЕШОК"';
         let p = [...DATA].sort(() => Math.random() - 0.5);
         let p1 = p.slice(0, SIZE); let p2 = p.slice(SIZE, SIZE * 2);
         bag = [...p1, ...p2].sort(() => Math.random() - 0.5);
@@ -89,7 +92,7 @@
     function check() {
         [1,2].forEach(n => {
             if(document.getElementById('g' + n).querySelectorAll('.chip.ok').length === SIZE) {
-                aW.play(); document.getElementById('st').innerText = 'Молодец!';
+                aW.play(); document.getElementById('st').innerText = 'ГЕНИАЛЬНО! 🏆';
             }
         });
     }
