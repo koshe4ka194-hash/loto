@@ -1,211 +1,98 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* --- СТИЛЬ «ЖИВОЙ» ИГРЫ НА СТОЛЕ --- */
-        :root {
-            --wood: #4e342e;
-            --p1-bg: #fff9f9;
-            --p2-bg: #f9fbff;
-            --accent: #ff9800;
-        }
-
-        body {
-            margin: 0; padding: 10px;
-            background: radial-gradient(circle, #5d4037 0%, #2b1d1a 100%); /* Текстура стола */
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            display: flex; justify-content: center;
-            color: white; overflow-x: hidden;
-        }
-
-        .game-wrapper {
-            max-width: 800px; width: 100%;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
-        }
-
-        /* --- ОБЪЕМНЫЙ МЕШОК --- */
-        .bag-bowl {
-            background: #fdf5e6;
-            border: 5px solid #8d6e63;
-            border-radius: 30px;
-            padding: 15px; width: 180px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 5px 10px rgba(0,0,0,0.2);
-            text-align: center; color: #3e2723;
-        }
-
-        #token-display {
-            width: 80px; height: 80px;
-            background: #d7ccc8; border-radius: 50%;
-            margin: 10px auto;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);
-            border: 2px solid #a1887f;
-        }
-
-        /* --- КНОПКИ С ПОДСВЕТКОЙ --- */
-        .btn-3d {
-            background: linear-gradient(180deg, #ffb74d 0%, #f57c00 100%);
-            border: none; padding: 10px 20px;
-            border-radius: 12px;
-            color: white; font-weight: bold; font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 5px 0 #b71c1c, 0 8px 15px rgba(0,0,0,0.4);
-            transition: 0.1s;
-            text-transform: uppercase;
-        }
-        .btn-3d:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #b71c1c, 0 4px 8px rgba(0,0,0,0.4);
-        }
-        .btn-3d:hover { filter: brightness(1.1); box-shadow: 0 5px 0 #b71c1c, 0 0 15px var(--accent); }
-
-        /* --- КАРТОЧКИ РЯДОМ --- */
-        .cards-row {
-            display: flex; flex-direction: row; /* Карточки в ряд */
-            gap: 15px; width: 100%; justify-content: center;
-        }
-        
-        .player-card {
-            flex: 1; background: white; border-radius: 15px;
-            padding: 10px; min-width: 200px; max-width: 280px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            border-bottom: 5px solid rgba(0,0,0,0.2);
-        }
-        .p1 { background: var(--p1-bg); }
-        .p2 { background: var(--p2-bg); }
-
-        .player-name { color: #333; font-weight: bold; margin-bottom: 10px; font-size: 16px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
-
-        /* --- КРУГЛЫЕ ФИШКИ --- */
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        
-        .chip {
-            aspect-ratio: 1; background: white; border-radius: 50%;
-            border: 3px solid #eee;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: relative;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2), inset 0 -2px 3px rgba(0,0,0,0.1);
-        }
-        .chip img { width: 70%; height: 70%; object-fit: contain; }
-        
-        .chip.found::after {
-            content: "✔"; position: absolute;
-            width: 100%; height: 100%;
-            background: rgba(46, 204, 113, 0.85);
-            border-radius: 50%; color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; font-weight: bold;
-            box-shadow: 0 0 10px #2ecc71;
-        }
-
-        #status { height: 20px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 16px; }
+        body { margin:0; padding:10px; background: radial-gradient(circle, #1995ae 0%, #000 180%); font-family: sans-serif; color:white; display:flex; flex-direction:column; align-items:center; min-height:100vh; overflow:hidden; }
+        .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; }
+        .bag-box { background:#fdf5e6; border:5px solid #8d6e63; border-radius:25px; padding:15px; width:280px; text-align:center; color:#3e2723; box-shadow:0 10px 20px rgba(0,0,0,0.5); margin-bottom:15px; }
+        #slot { width:100%; min-height:80px; background:#d7ccc8; border-radius:15px; margin:10px auto; display:flex; align-items:center; justify-content:center; border:2px solid #a1887f; box-shadow:inset 0 4px 8px rgba(0,0,0,0.2); padding:10px; box-sizing:border-box; font-size:18px; line-height:1.3; font-weight:bold; }
+        .btn { background:linear-gradient(180deg, #ffb74d, #f57c00); color:white; border:none; padding:12px 20px; border-radius:10px; font-weight:bold; cursor:pointer; box-shadow:0 4px 0 #b71c1c; text-transform:uppercase; font-size:14px; }
+        .btn:active { transform:translateY(2px); box-shadow:0 2px 0 #b71c1c; }
+        .row { display:flex; gap:15px; justify-content:center; width:98%; max-width:1000px; }
+        .card { background:white; border-radius:15px; padding:12px; flex:1; box-shadow:0 10px 20px rgba(0,0,0,0.4); color:#333; min-width:280px; }
+        .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px; }
+        .chip { height: 85px; background:white; border-radius:15px; border:2px solid #eee; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden; text-align:center; padding:5px; box-sizing:border-box; font-weight:bold; font-size:14px; }
+        .chip img { width:90%; height:90%; object-fit:contain; }
+        .chip.ok::after { content:"✔"; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(46, 204, 113, 0.9); color:white; display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:bold; }
+        #st { font-weight:bold; font-size:20px; text-align:center; margin-bottom:10px; height:24px; text-shadow:0 2px 4px rgba(0,0,0,0.5); color:#ffca28; }
     </style>
 </head>
 <body>
-
-<div class="game-wrapper">
-    <div id="status">Загрузка...</div>
-
-    <div class="bag-bowl">
-        <div style="font-size: 11px; font-weight: bold;">ОСТАЛОСЬ: <span id="count">0</span></div>
-        <div id="token-display">?</div>
-        <button id="draw-btn" class="btn-3d" onclick="draw()">ДОСТАТЬ</button>
+    <div id="startLayer" class="overlay">
+        <h2 style="color:white; margin-bottom:20px;">Овощи</h2>
+        <button class="btn" onclick="startAudio()">НАЧАТЬ ИГРУ</button>
     </div>
-
-    <div class="cards-row">
-        <div class="player-card p1">
-            <div class="player-name">ИГРОК 1</div>
-            <div id="grid1" class="grid"></div>
-        </div>
-        <div class="player-card p2">
-            <div class="player-name">ИГРОК 2</div>
-            <div id="grid2" class="grid"></div>
-        </div>
+    <h2 style="margin:0 0 5px 0;">Овощи</h2>
+    <div id="st">Нажмите кнопку</div>
+    <div class="bag-box">
+        <div id="slot">?</div>
+        <button class="btn" onclick="draw()">ПОТРЯСИ МЕШОК</button>
     </div>
-
-    <button class="btn-3d" style="background:#78909c; box-shadow: 0 5px 0 #455a64; font-size: 11px;" onclick="init()">ПЕРЕМЕШАТЬ ВСЁ</button>
-</div>
+    <div class="row">
+        <div class="card"><center><b>ИГРОК 1</b></center><div id="g1" class="grid"></div></div>
+        <div class="card"><center><b>ИГРОК 2</b></center><div id="g2" class="grid"></div></div>
+    </div>
+    <button class="btn" style="margin-top:20px; background:#607d8b; box-shadow:0 4px 0 #37474f; font-size:10px;" onclick="reset()">СБРОСИТЬ</button>
 
 <script>
-    const IMGS = [
-        "https://cdn-icons-png.flaticon.com/128/2909/2909774.png",
-        "https://cdn-icons-png.flaticon.com/128/2909/2909808.png",
-        "https://cdn-icons-png.flaticon.com/128/2909/2909881.png",
-        "https://cdn-icons-png.flaticon.com/128/2909/2909846.png",
-        "https://cdn-icons-png.flaticon.com/128/2909/2909761.png",
-        "https://cdn-icons-png.flaticon.com/128/2909/2909890.png",
-        "https://cdn-icons-png.flaticon.com/128/1135/1135534.png",
-        "https://cdn-icons-png.flaticon.com/128/1135/1135544.png",
-        "https://cdn-icons-png.flaticon.com/128/1135/1135531.png",
-        "https://cdn-icons-png.flaticon.com/128/1135/1135538.png",
-        "https://cdn-icons-png.flaticon.com/128/1135/1135548.png",
-        "https://cdn-icons-png.flaticon.com/128/1135/1135530.png"
-    ];
+    const DATA = [{"q":"Сидит дед во сто шуб одет","a":"лук"},{"q":"Сидит девица в темнице, а коса на улице","a":"морковь"},{"q":"Сто одёжек и все без застёжек","a":"капуста"},{"q":"Его любят даже детки","a":"помидор"},{"q":"В землю вросло.","a":"свекла"},{"q":"Маленький и горький, луку брат","a":"чеснок"},{"q":"Очень важный…","a":"баклажан"},{"q":"На грядке","a":"репка"},{"q":"Под зеленым листом.","a":"редиска"},{"q":"Крепкие, соленые.","a":"огурцы"},{"q":"Голова на ножке, в голове горошки.","a":"горох"},{"q":"Где солнце стоит, туда он и глядит","a":"подсолнух"},{"q":"Это вовсе не игрушка — Ароматная…","a":"петрушка"}];
+    const TYPE = 'txt';
+    const SIZE = 6;
+    const BASE = 'https://koshe4ka194-hash.github.io/lotto/img/';
+    const aD = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/meshok.mp3'); 
+    const aP = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/fishka.mp3'); 
+    const aW = new Audio('https://github.com/koshe4ka194-hash/lotto/raw/refs/heads/main/victory.mp3');
+    let bag = [], curr = null;
 
-    let bag = [];
-    let current = null;
+    function startAudio() {
+        [aD, aP, aW].forEach(s => { s.play().then(() => s.pause()); });
+        document.getElementById('startLayer').style.display = 'none';
+        reset();
+    }
 
-    function init() {
-        current = null;
-        document.getElementById('draw-btn').disabled = false;
-        document.getElementById('token-display').innerHTML = '<span style="font-size:30px;color:#a1887f">?</span>';
-        document.getElementById('status').innerText = "Игра готова! Ходите.";
-
-        let pool = [...IMGS].sort(() => Math.random() - 0.5);
-        let p1Set = pool.slice(0, 6);
-        let p2Set = pool.slice(6, 12);
-
-        bag = [...p1Set, ...p2Set].sort(() => Math.random() - 0.5);
-
-        render('grid1', p1Set);
-        render('grid2', p2Set);
-        updateUI();
+    function reset() {
+        curr = null; document.getElementById('slot').innerText = '?';
+        let p = [...DATA].sort(() => Math.random() - 0.5);
+        let p1 = p.slice(0, SIZE); let p2 = p.slice(SIZE, SIZE * 2);
+        bag = [...p1, ...p2].sort(() => Math.random() - 0.5);
+        render('g1', p1); render('g2', p2);
+        document.getElementById('st').innerText = 'Ходите!';
     }
 
     function render(id, items) {
-        const g = document.getElementById(id);
-        g.innerHTML = '';
-        items.forEach(src => {
-            const div = document.createElement('div');
-            div.className = 'chip';
-            div.innerHTML = `<img src="${src}">`;
-            div.onclick = () => {
-                if (src === current) {
-                    div.classList.add('found');
-                    checkWin();
+        const g = document.getElementById(id); g.innerHTML = '';
+        items.forEach(item => {
+            const d = document.createElement('div'); d.className = 'chip';
+            if(TYPE === 'img') {
+                d.innerHTML = '<img src="'+BASE+item.a+'" onerror="this.parentNode.innerText=\'❌\' ">';
+            } else {
+                d.innerText = item.a;
+            }
+            d.onclick = () => {
+                if(curr && item.a === curr.a) {
+                    aP.currentTime=0; aP.play();
+                    d.classList.add('ok'); check();
                 }
             };
-            g.appendChild(div);
+            g.appendChild(d);
         });
     }
 
     function draw() {
-        if (bag.length === 0) return;
-        current = bag.pop();
-        document.getElementById('token-display').innerHTML = `<div class="chip" style="width:60px; height:60px; cursor:default; border:none;"><img src="${current}"></div>`;
-        document.getElementById('status').innerText = "Ищите фишку!";
-        updateUI();
-        if (bag.length === 0) document.getElementById('draw-btn').disabled = true;
+        if(!bag.length) return;
+        aD.currentTime=0; aD.play();
+        curr = bag.pop();
+        setTimeout(() => { document.getElementById('slot').innerText = curr.q; }, 300);
     }
 
-    function updateUI() {
-        document.getElementById('count').innerText = bag.length;
-    }
-
-    function checkWin() {
-        [1, 2].forEach(n => {
-            const cells = document.querySelectorAll(`#grid${n} .chip`);
-            const found = document.querySelectorAll(`#grid${n} .chip.found`);
-            if (cells.length === found.length && cells.length > 0) {
-                document.getElementById('status').innerText = `🏆 ИГРОК ${n} ПОБЕДИЛ!`;
-                document.getElementById('draw-btn').disabled = true;
+    function check() {
+        [1,2].forEach(n => {
+            if(document.getElementById('g' + n).querySelectorAll('.chip.ok').length === SIZE) {
+                aW.play(); document.getElementById('st').innerText = 'Молодец!';
             }
         });
     }
-
-    init();
 </script>
 </body>
 </html>
